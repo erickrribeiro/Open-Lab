@@ -1,0 +1,18 @@
+body {
+	font-family: arial, helvetica, sans-serif;
+}
+
+#div-cabecalho {
+	border: solid;
+	background-color: lightgray;
+	padding: 4px;
+	text-align: center;
+}
+
+#div-log {
+}
+
+#div-frames{
+	
+	background-color: lightblue;
+}
