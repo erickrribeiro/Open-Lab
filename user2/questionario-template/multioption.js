@@ -4,6 +4,9 @@ var question2Hard;
 var question2Easy;
 var exercise1;
 var exercise2;
+
+var question;
+
 var aula;
 var screen;
 var idView;
@@ -138,9 +141,9 @@ function initializeVariables(){
 function proxima() {
 
 	idView++;
-
+	console.log("proxima",idView);
 	idTela = getCookie("screen");
-	console.log(idTela); // nao tá pegando
+	//console.log(idTela); // nao tá pegando
   	var timestamp = new Date().getTime();	
     //$.post("http://192.168.1.123:5000/storage/1",
     $.post("http://localhost:5000/storage/1",
@@ -160,7 +163,7 @@ function proxima() {
 	if (idView == -1) {
 		window.frames[0].location = "conteudo.html";		
 		screen = "conteudo";
-		if(setCookie("screen", screen)); //console.log("true");			
+		if(setCookie("screen", screen)); console.log("ENTRO NA TELA CONTEUDO");			
 		//console.log(getCookie("screen"));
 	} else if(idView == aula.length) {
 		idView = aula.length;
@@ -171,10 +174,21 @@ function proxima() {
 		//console.log(getCookie("screen"));
 	} else if (idView == -2){
 		idView = bkpIdView;
-		if (aula[idView]["questionEasy"]["flagShow"] == false) {
-		window.frames[0].location = aula[idView]["questionHard"]["nome"];
-		//console.log("-2 IF HARD");
-		} else{
+		if (aula[idView]["questionEasy"]["flagShow"] == false &&
+			aula[idView]["questionHard"]["flagTip"] == false) {
+			window.frames[0].location = aula[idView]["questionHard"]["nome"];
+		}
+		else if (aula[idView]["questionEasy"]["flagShow"] == false &&
+			aula[idView]["questionHard"]["flagTip"] == true) {
+			window.frames[0].location = aula[idView]["questionHard"]["nome"];
+			console.log("here");
+		}
+		else if (aula[idView]["questionHard"]["flagBackContent"] == false){
+			//window.frames[0].location = "conteudo.html";
+			console.log("question hard");
+		}
+		else {
+			
 			window.frames[0].location = aula[idView]["questionEasy"]["nome"];
 			//console.log("-2 ELSE EASY");
 		}
@@ -197,7 +211,7 @@ function volta() {
 	idView--;
 
 	idTela = getCookie("screen");
-	console.log(idTela);
+	//console.log(idTela);
   	var timestamp = new Date().getTime();	
     //$.post("http://192.168.1.123:5000/storage/1",
     $.post("http://localhost:5000/storage/1",
@@ -230,26 +244,34 @@ function volta() {
 		screen = "questionHard";
 		if(setCookie("screen", screen)); //console.log("true");	
 		//console.log(getCookie("screen"));
-	}	
+	}
 }
-
-
 
 function changeContent(){
 	// >-1 significa está em um exercicio e não em um conteúdo ou dica
+	console.log("idView",idView);
 	if (idView > -1){
 		bkpIdView = idView;
+		console.log("estou no dentro do loop");
 		if (aula[idView]["questionEasy"]["flagShow"] == false) {
 			if (aula[idView]["questionHard"]["flagTip"] == false){
 				stopThreadSendAnalytics();
-				alert('Você aceita uma dica? (Difícil)');
+				var choose = confirm('Você aceita uma dica? (Difícil)');
 				startThreadSendAnalytics();
 				sendDataAlert();
-				aula[idView]["questionHard"]["flagTip"] = true;
-				window.frames[0].location = aula[idView]["questionHard"]["tip"];
-				idView = -3;
-				console.log("dica difícil");			
-			} else if (aula[idView]["questionHard"]["flagBackContent"] == false){
+				aula[idView]["questionHard"]["flagTip"] = true; // marcar que passou pela dica	
+				if (choose) {
+					window.frames[0].location = aula[idView]["questionHard"]["tip"];
+					console.log("dica difícil");
+					idView = -3;
+				}
+				else {
+					console.log("Aluno nao aceitou a dica", idView);
+				}
+			}
+			else if (aula[idView]["questionHard"]["flagBackContent"] == false &&
+				aula[idView]["questionHard"]["flagTip"] == true){
+				
 				stopThreadSendAnalytics();
 				alert('Vamos voltar ao conteúdo? (Difícil)');
 				startThreadSendAnalytics();
@@ -264,31 +286,41 @@ function changeContent(){
 				startThreadSendAnalytics();
 				sendDataAlert();
 				aula[idView]["questionEasy"]["flagShow"] = true;
-				window.frames[0].location = aula[idView]["questionEasy"]["nome"]
+				window.frames[0].location = aula[idView]["questionEasy"]["nome"];
 				console.log("questão mais fácil");				
 			} else if (aula[idView]["questionEasy"]["flagTip"] == false){
 				stopThreadSendAnalytics();
-				alert('Você aceita uma dica? (Fácil)');
+				var choose = confirm('Você aceita uma dica? (Fácil)');
 				startThreadSendAnalytics();
 				sendDataAlert();
 				aula[idView]["questionEasy"]["flagTip"] = true;
-				window.frames[0].location = aula[idView]["questionHard"]["tip"];
-				idView = -3;
-				console.log("dica fácil");				
+				if (choose) {
+					window.frames[0].location = aula[idView]["questionHard"]["tip"];
+					console.log("dica fácil");
+					idView = -3;				
+				}
+				else {
+					console.log("Aluno não aceitou dica");					
+				}
 			} else{
 				console.log("Professor será notificado");
-			}		
+			}
 		} else {
-			//console.log("else")
+			console.log("else");
 			if (aula[idView]["questionEasy"]["flagTip"] == false){
 				stopThreadSendAnalytics();
-				alert('Você aceita uma dica? (Fácil)');
+				var choose = confirm('Você aceita uma dica? (Fácil)');
 				startThreadSendAnalytics();
 				sendDataAlert();
 				aula[idView]["questionEasy"]["flagTip"] = true;
-				window.frames[0].location = aula[idView]["questionEasy"]["tip"];
-				idView = -3;
-				console.log("dica fácil");			
+				if (choose) {
+					window.frames[0].location = aula[idView]["questionEasy"]["tip"];
+					console.log("dica fácil");	
+					idView = -3;
+				}
+				else {
+					console.log("Não aceitou a dica");
+				}
 			} else if (aula[idView]["questionEasy"]["flagBackContent"] == false){
 				stopThreadSendAnalytics();
 				alert('Vamos voltar ao conteúdo? (Fácil)');
@@ -323,7 +355,7 @@ function adaptativeContent(){
   	xhttp.onreadystatechange = function() {
 	if (xhttp.readyState == 4 && xhttp.status == 200) {
 		flag = xhttp.responseText;
-		//console.log("flag: "+flag);
+		console.log("flag: "+flag);
 		if (flag == "True") {
 			changeContent();	
 				}
