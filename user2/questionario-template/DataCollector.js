@@ -1,13 +1,29 @@
 
+
+var debug = true;
 onload =  function(e){
-	var html = document.querySelectorAll("html");	
-	
+	var html = document.querySelectorAll("html");
+
 	for (var i=0;  i < html.length; i++) {
-		html[i].addEventListener("click", listenClick);  				
+		html[i].addEventListener("click", listenClick);
 		//html[i].addEventListener("mouseover", listemMouseOver);
 		//html[i].addEventListener("mouseout", listemMouseOut);
 	}	
 }
+
+var escolha;
+window.confirm = function(al, $){
+    return function(msg) {
+        al.call(window,msg);
+        $(window).trigger("confirmacao");
+    };
+}(window.confirm, window.jQuery);
+
+
+$(window).on("confirmacao", function(e) {
+    console.log("escolhi: "+escolha);
+});
+
 
 function getCookie(cname) {
     var name = cname + "=";
@@ -28,25 +44,29 @@ function getCookie(cname) {
 }
 
 function listenClick(e){
-//	console.log("-----------------");			
-	//console.log(e);			
-    //console.log("x: "+e.screenX+" y: "+e.screenY);
-	//console.log(e.type);			
-	//console.log("target id: " +e.target.id);
-    //console.log("target class: " +e.target.className);
-	//console.log(e.target.localName);
-    //console.log(e.timeStamp);	    
-	//console.log(e.which);
-	idTela = getCookie("screen");
-	//console.log("oi",idTela);	
+    idTela = getCookie("screen");
     var timestamp = new Date().getTime();
-  //console.log("DataCollector timestamp: "+timestamp);
+
+    if(debug) {
+        console.log("-----------------");
+        console.log(e);
+        console.log("tela:" + e.target.baseURI.split("/").slice(-1)[0]);
+        console.log("x: " + e.screenX + " y: " + e.screenY);
+        console.log(e.type);
+        console.log("target id: " + e.target.id);
+        console.log("target class: " + e.target.className);
+        console.log(e.target.localName);
+        console.log(e.timeStamp);
+        console.log(e.which);
+        console.log("DataCollector timestamp: "+timestamp);
+    }
 
     $.post("http://localhost:5000/storage/1",
     {
       idUser: "2",
       timeStamp: timestamp,
       tipo: e.type,
+      tela: e.target.baseURI.split("/").slice(-1)[0],
       tag: e.target.localName,
       x:e.screenX,
       y:e.screenY,
@@ -54,7 +74,7 @@ function listenClick(e){
     },
     function(data, status){
        // alert("Data: " + data + "\nStatus: " + status);
-    });    
+    });
 }
 
 function listemMouseOver(e){
