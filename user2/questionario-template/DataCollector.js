@@ -1,14 +1,44 @@
-
-
 var debug = true;
+var timer;
+var currentScreen = "conteudo.html";
+
 onload =  function(e){
+
 	var html = document.querySelectorAll("html");
 
 	for (var i=0;  i < html.length; i++) {
 		html[i].addEventListener("click", listenClick);
 		//html[i].addEventListener("mouseover", listemMouseOver);
 		//html[i].addEventListener("mouseout", listemMouseOut);
-	}	
+	}
+
+    //timer = setInterval(overflowTimer, 2000);
+}
+
+function overflowTimer(){
+    idTela = getCookie("screen");
+    var timestamp = new Date().getTime();
+
+    if(debug) {
+        console.log("-------after two seconds----------");
+        console.log("DataCollector timestamp: "+timestamp);
+        console.log("Tela Atual: "+currentScreen);
+    }
+
+    $.post("http://localhost:5000/storage/1",
+        {
+            idUser: "2",
+            timeStamp: timestamp,
+            tipo: null,
+            tela: currentScreen,
+            tag: null,
+            x: null,
+            y: null,
+            id: idTela,
+        },
+        function(data, status){
+            // alert("Data: " + data + "\nStatus: " + status);
+        });
 }
 
 var escolha;
@@ -44,13 +74,17 @@ function getCookie(cname) {
 }
 
 function listenClick(e){
+    clearInterval(timer);
+    timer = setInterval(overflowTimer, 2000);
+    currentScreen = e.target.baseURI.split("/").slice(-1)[0];
+
     idTela = getCookie("screen");
     var timestamp = new Date().getTime();
 
     if(debug) {
         console.log("-----------------");
         console.log(e);
-        console.log("tela:" + e.target.baseURI.split("/").slice(-1)[0]);
+        console.log("tela:" + currentScreen);
         console.log("x: " + e.screenX + " y: " + e.screenY);
         console.log(e.type);
         console.log("target id: " + e.target.id);
@@ -66,7 +100,7 @@ function listenClick(e){
       idUser: "2",
       timeStamp: timestamp,
       tipo: e.type,
-      tela: e.target.baseURI.split("/").slice(-1)[0],
+      tela: currentScreen,
       tag: e.target.localName,
       x:e.screenX,
       y:e.screenY,
