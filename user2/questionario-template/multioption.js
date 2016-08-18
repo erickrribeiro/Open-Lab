@@ -167,6 +167,7 @@ function proxima() {
 		//console.log(getCookie("screen"));
 	} else if(idView == aula.length) {
 		idView = aula.length;
+		console.log("deu errado");
 		stopThreadSendAnalytics();
 		window.frames[0].location = "fim.html";
 		screen = "conteudo";
@@ -190,7 +191,7 @@ function proxima() {
 		else {
 			
 			window.frames[0].location = aula[idView]["questionEasy"]["nome"];
-			//console.log("-2 ELSE EASY");
+			console.log("-2 ELSE EASY");
 		}
 	} else {
 		//console.log("ELSE");
